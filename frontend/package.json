@@ -1,0 +1,12 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Phone-friendly UI for Mom's Cake Business Manager",
+  "scripts": {
+    "start": "python ../run.py",
+    "dev": "python ../run.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

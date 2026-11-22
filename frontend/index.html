@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#9c4146">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Mom's Cake Bakery Manager</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%200%22%20100%22%20100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ========================================================== -->
+  <!-- LOGIN SCREEN (Shown if not authenticated)                 -->
+  <!-- ========================================================== -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand-icon">🎂</div>
+      <h1 class="login-title">Mom's Cake Manager</h1>
+      <p class="login-sub">Private Baker Business Portal</p>
+
+      <form id="login-form">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label" for="login-username">Username</label>
+          <input 
+            type="text" 
+            id="login-username" 
+            class="form-control" 
+            placeholder="Enter username" 
+            autocomplete="username" 
+            autocapitalize="none" 
+            required
+          >
+        </div>
+
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label" for="login-password">Password</label>
+          <input 
+            type="password" 
+            id="login-password" 
+            class="form-control" 
+            placeholder="Enter password" 
+            autocomplete="current-password" 
+            required
+          >
+        </div>
+
+        <button type="submit" id="login-btn" class="btn btn-primary btn-full" style="margin-top: 8px;">
+          Log In to Bakery
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MAIN APP CONTAINER                                         -->
+  <!-- ========================================================== -->
+  <div id="app-container" class="app-container" style="display: none;">
+
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🍰</div>
+        <div>
+          <div class="brand-title">Mom's Bakery</div>
+          <div class="brand-subtitle">Private In-Person Sales & Stock</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-export-quick" class="icon-btn" title="Download CSV Records">
+          📥
+        </button>
+        <button id="btn-user-settings" class="icon-btn" title="Owner Profile & Security">
+          👤
+        </button>
+        <button id="btn-logout" class="icon-btn" title="Logout">
+          🚪
+        </button>
+      </div>
+    </header>
+
+    <!-- Main View Switcher Container -->
+    <main class="view-container">
+
+      <!-- ================= 1. DASHBOARD VIEW ================= -->
+      <section id="view-dashboard" class="view-section active">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Bakery Overview</h2>
+            <p class="section-subtitle">Real-time sales, purchases & inventory</p>
+          </div>
+          <button id="btn-refresh-dashboard" class="btn btn-secondary btn-sm">
+            🔄 Refresh
+          </button>
+        </div>
+
+        <!-- Dedicated "Sales Minus Purchases" Card (Explicitly NOT called profit) -->
+        <div class="net-card">
+          <div class="net-header">
+            <span class="net-title">Sales minus Purchases</span>
+            <span class="net-badge-note">Gross Cash Flow</span>
+          </div>
+          <div class="net-value-row">
+            <div id="dash-net-month" class="net-value-large net-positive">₹0.00</div>
+            <div style="font-size: 13px; color: var(--text-muted);">This Month</div>
+          </div>
+          <div class="net-explainer" id="dash-net-sub">
+            Today: ₹0.00 (Sales minus Purchases) | All-time: ₹0.00
+          </div>
+        </div>
+
+        <!-- Metric Grid for Sales & Purchases -->
+        <div class="metrics-grid">
+          <!-- Sales Card -->
+          <div class="metric-card" style="border-left: 4px solid var(--primary);">
+            <div class="metric-label">
+              <span>🍰 Total Sales</span>
+            </div>
+            <div id="dash-sales-month" class="metric-value">₹0.00</div>
+            <div id="dash-sales-sub" class="metric-sub">Today: ₹0.00</div>
+          </div>
+
+          <!-- Purchases Card -->
+          <div class="metric-card" style="border-left: 4px solid var(--secondary);">
+            <div class="metric-label">
+              <span>🧾 Total Purchases</span>
+            </div>
+            <div id="dash-purchases-month" class="metric-value">₹0.00</div>
+            <div id="dash-purchases-sub" class="metric-sub">Today: ₹0.00</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Grid -->
+        <div class="quick-actions">
+          <div class="action-card-btn" id="action-quick-sale">
+            <div class="action-icon-wrap" style="background-color: var(--primary-light); color: var(--primary);">
+              ➕
+            </div>
+            <div>
+              <div class="action-title">Record Sale</div>
+              <div class="action-sub">In-person order</div>
+            </div>
+          </div>
+
+          <div class="action-card-btn" id="action-quick-bake">
+            <div class="action-icon-wrap" style="background-color: #fef3c7; color: #b45309;">
+              🎂
+            </div>
+            <div>
+              <div class="action-title">Bake a Cake</div>
+              <div class="action-sub">Deduct stock</div>
+            </div>
+          </div>
+
+          <div class="action-card-btn" id="action-quick-purchase">
+            <div class="action-icon-wrap" style="background-color: var(--secondary-light); color: var(--secondary);">
+              🧾
+            </div>
+            <div>
+              <div class="action-title">Add Purchase</div>
+              <div class="action-sub">Bill & supplies</div>
+            </div>
+          </div>
+
+          <div class="action-card-btn" id="action-quick-shopping">
+            <div class="action-icon-wrap" style="background-color: #e0f2fe; color: #0284c7;">
+              🛒
+            </div>
+            <div>
+              <div class="action-title">Shopping List</div>
+              <div class="action-sub" id="dash-shopping-sub">Check items</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rule-Based Stock Alerts Banner -->
+        <div id="dash-stock-alerts-card" class="alert-card" style="display: none;">
+          <div class="alert-header">
+            <span>⚠️</span>
+            <span>Low Stock Alerts (<span id="dash-low-stock-count">0</span> items)</span>
+          </div>
+          <div id="dash-stock-alerts-list">
+            <!-- Alert Items Rendered Here -->
+          </div>
+          <button id="btn-dash-auto-shopping" class="btn btn-primary btn-sm btn-full" style="margin-top: 10px;">
+            ⚡ Add Low-Stock Items to Shopping List
+          </button>
+        </div>
+
+        <!-- Machine Learning Shortage Predictor Readiness Status -->
+        <div class="ml-card">
+          <div class="ml-header">
+            <div class="ml-title">
+              <span>🤖</span>
+              <span>Smart Shortage Predictor</span>
+            </div>
+            <span id="ml-status-pill" class="ml-status-pill">Checking...</span>
+          </div>
+          <div class="ml-progress-bar">
+            <div id="ml-progress-fill" class="ml-progress-fill" style="width: 10%;"></div>
+          </div>
+          <p id="ml-status-text" class="ml-desc">
+            Rule-based alerts are currently guarding your stock. To train an accurate machine-learning shortage forecasting model without fabricated data, real baking and sales history is being systematically stored.
+          </p>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="card">
+          <div class="card-title">
+            <span>Recent Activity</span>
+            <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">Latest transactions</span>
+          </div>
+          <div id="dash-recent-activity">
+            <!-- Activity Items Rendered Here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. SALES VIEW ================= -->
+      <section id="view-sales" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Sales Records</h2>
+            <p class="section-subtitle">Record and track in-person cake sales</p>
+          </div>
+          <button id="btn-open-new-sale" class="btn btn-primary btn-sm">
+            ➕ New Sale
+          </button>
+        </div>
+
+        <!-- Daily & Monthly Totals Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Today's Sales</div>
+            <div id="sales-today-val" class="metric-value">₹0.00</div>
+            <div id="sales-today-count" class="metric-sub">0 sales</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">This Month</div>
+            <div id="sales-month-val" class="metric-value">₹0.00</div>
+            <div id="sales-month-count" class="metric-sub">0 sales</div>
+          </div>
+        </div>
+
+        <!-- Filter pills -->
+        <div class="filter-row">
+          <button class="filter-pill active" data-sales-filter="all">All Time</button>
+          <button class="filter-pill" data-sales-filter="today">Today</button>
+          <button class="filter-pill" data-sales-filter="week">This Week</button>
+          <button class="filter-pill" data-sales-filter="month">This Month</button>
+        </div>
+
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="sales-search-input" class="search-input" placeholder="Search by cake name or customer...">
+        </div>
+
+        <!-- Sales list -->
+        <div id="sales-list-container">
+          <!-- Sales Cards Rendered Here -->
+        </div>
+      </section>
+
+      <!-- ================= 3. PURCHASES VIEW ================= -->
+      <section id="view-purchases" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Purchases & Expenses</h2>
+            <p class="section-subtitle">Record ingredient bills & store expenses</p>
+          </div>
+          <button id="btn-open-new-purchase" class="btn btn-primary btn-sm">
+            ➕ Add Bill
+          </button>
+        </div>
+
+        <!-- Totals Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Today's Bills</div>
+            <div id="purchases-today-val" class="metric-value">₹0.00</div>
+            <div id="purchases-today-count" class="metric-sub">0 bills</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">This Month</div>
+            <div id="purchases-month-val" class="metric-value">₹0.00</div>
+            <div id="purchases-month-count" class="metric-sub">0 bills</div>
+          </div>
+        </div>
+
+        <!-- Filter pills -->
+        <div class="filter-row">
+          <button class="filter-pill active" data-purchases-filter="all">All Time</button>
+          <button class="filter-pill" data-purchases-filter="today">Today</button>
+          <button class="filter-pill" data-purchases-filter="month">This Month</button>
+        </div>
+
+        <!-- Purchases list -->
+        <div id="purchases-list-container">
+          <!-- Purchases Cards Rendered Here -->
+        </div>
+      </section>
+
+      <!-- ================= 4. INVENTORY VIEW ================= -->
+      <section id="view-inventory" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Ingredients & Stock</h2>
+            <p class="section-subtitle">Track quantities, alerts & history</p>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button id="btn-toggle-inventory-logs" class="btn btn-secondary btn-sm" title="Stock Change Audit History">
+              📜 Logs
+            </button>
+            <button id="btn-open-new-ingredient" class="btn btn-primary btn-sm">
+              ➕ Item
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter pills & Category Pills -->
+        <div class="filter-row">
+          <button class="filter-pill active" data-stock-filter="all">All Items</button>
+          <button class="filter-pill" data-stock-filter="low">⚠️ Low Stock Only</button>
+          <button class="filter-pill" data-stock-filter="flour">Flour & Dry</button>
+          <button class="filter-pill" data-stock-filter="dairy">Dairy & Eggs</button>
+          <button class="filter-pill" data-stock-filter="packaging">Packaging</button>
+        </div>
+
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="inventory-search-input" class="search-input" placeholder="Search ingredient name...">
+        </div>
+
+        <!-- Inventory items list -->
+        <div id="inventory-list-container">
+          <!-- Ingredient cards rendered here -->
+        </div>
+      </section>
+
+      <!-- ================= 5. RECIPES & BAKE VIEW ================= -->
+      <section id="view-recipes" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Recipes & Baking</h2>
+            <p class="section-subtitle">Bake cakes and auto-deduct ingredients</p>
+          </div>
+          <button id="btn-open-new-recipe" class="btn btn-primary btn-sm">
+            ➕ New Recipe
+          </button>
+        </div>
+
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="recipes-search-input" class="search-input" placeholder="Search cake recipes...">
+        </div>
+
+        <!-- Recipe cards list -->
+        <div id="recipes-list-container">
+          <!-- Recipe cards rendered here -->
+        </div>
+      </section>
+
+      <!-- ================= 6. SHOPPING LIST VIEW ================= -->
+      <section id="view-shopping" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Shopping List</h2>
+            <p class="section-subtitle">Items to buy for your bakery</p>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button id="btn-shopping-auto-add" class="btn btn-primary btn-sm">
+              ⚡ Auto Add Low Stock
+            </button>
+            <button id="btn-open-new-shopping-item" class="btn btn-secondary btn-sm">
+              ➕ Add
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="font-size: 13px; color: var(--text-muted);">
+            Check an item when bought to automatically update stock.
+          </span>
+          <button id="btn-clear-bought-items" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;">
+            Clear Done
+          </button>
+        </div>
+
+        <!-- Shopping items list -->
+        <div id="shopping-list-container">
+          <!-- Shopping item rows rendered here -->
+        </div>
+      </section>
+
+      <!-- ================= 7. EXPORTS / RECORDS VIEW ================= -->
+      <section id="view-exports" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Business CSV Records</h2>
+            <p class="section-subtitle">Download records for bookkeeping & accounts</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Downloadable CSV Spreadsheets</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Tap any button below to download the official CSV data directly to your phone or computer.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a id="link-export-sales" href="#" class="btn btn-secondary btn-full" style="justify-content: flex-start;">
+              <span style="font-size: 20px;">🍰</span>
+              <div style="text-align: left; margin-left: 8px;">
+                <div style="font-weight: 700;">Export Sales Records (.csv)</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Dates, cake types, quantities, amounts, customer names</div>
+              </div>
+            </a>
+
+            <a id="link-export-purchases" href="#" class="btn btn-secondary btn-full" style="justify-content: flex-start;">
+              <span style="font-size: 20px;">🧾</span>
+              <div style="text-align: left; margin-left: 8px;">
+                <div style="font-weight: 700;">Export Purchase Records (.csv)</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Dates, bill totals, suppliers, purchased ingredient details</div>
+              </div>
+            </a>
+
+            <a id="link-export-inventory" href="#" class="btn btn-secondary btn-full" style="justify-content: flex-start;">
+              <span style="font-size: 20px;">📦</span>
+              <div style="text-align: left; margin-left: 8px;">
+                <div style="font-weight: 700;">Export Inventory Status (.csv)</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Current quantities, units, categories, min stock thresholds</div>
+              </div>
+            </a>
+
+            <a id="link-export-logs" href="#" class="btn btn-secondary btn-full" style="justify-content: flex-start;">
+              <span style="font-size: 20px;">📜</span>
+              <div style="text-align: left; margin-left: 8px;">
+                <div style="font-weight: 700;">Export Stock History & Audit Logs (.csv)</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Every bake deduction, restock purchase, and adjustment</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <div class="nav-inner">
+        <button class="nav-item active" data-nav="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+
+        <button class="nav-item" data-nav="sales">
+          <span class="nav-icon">🍰</span>
+          <span class="nav-label">Sales</span>
+        </button>
+
+        <button class="nav-item" data-nav="purchases">
+          <span class="nav-icon">🧾</span>
+          <span class="nav-label">Purchases</span>
+        </button>
+
+        <button class="nav-item" data-nav="inventory">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Stock</span>
+          <span id="nav-badge-stock" class="nav-badge" style="display: none;">0</span>
+        </button>
+
+        <button class="nav-item" data-nav="recipes">
+          <span class="nav-icon">📖</span>
+          <span class="nav-label">Recipes</span>
+        </button>
+
+        <button class="nav-item" data-nav="shopping">
+          <span class="nav-icon">🛒</span>
+          <span class="nav-label">Shopping</span>
+          <span id="nav-badge-shopping" class="nav-badge" style="display: none;">0</span>
+        </button>
+      </div>
+    </nav>
+
+  </div> <!-- End App Container -->
+
+
+  <!-- ========================================================== -->
+  <!-- MODALS & BOTTOM SHEETS                                    -->
+  <!-- ========================================================== -->
+
+  <!-- 1. RECORD SALE MODAL -->
+  <div id="modal-sale" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-sale-title">Record Cake Sale</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <form id="form-sale">
+        <input type="hidden" id="sale-edit-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="sale-cake-type">Cake Type / Flavor *</label>
+          <input 
+            type="text" 
+            id="sale-cake-type" 
+            class="form-control" 
+            placeholder="e.g. Chocolate Truffle (1 kg)" 
+            list="cake-suggestions"
+            required
+          >
+          <datalist id="cake-suggestions">
+            <!-- Filled dynamically with recipe names -->
+          </datalist>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="sale-quantity">Quantity *</label>
+            <div class="stepper-wrap">
+              <button type="button" class="stepper-btn" id="btn-sale-qty-minus">-</button>
+              <input 
+                type="number" 
+                id="sale-quantity" 
+                class="form-control" 
+                value="1" 
+                min="0.25" 
+                step="0.25" 
+                inputmode="decimal"
+                style="text-align: center; font-weight: 700;" 
+                required
+              >
+              <button type="button" class="stepper-btn" id="btn-sale-qty-plus">+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sale-amount">Amount (₹) *</label>
+            <input 
+              type="number" 
+              id="sale-amount" 
+              class="form-control" 
+              placeholder="750" 
+              min="0" 
+              step="any" 
+              inputmode="decimal" 
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="sale-date">Sale Date *</label>
+          <input type="date" id="sale-date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="sale-customer">Customer Name (Optional)</label>
+          <input type="text" id="sale-customer" class="form-control" placeholder="e.g. Mrs. Sharma (Neighbor)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <div class="chip-group" id="sale-payment-chips">
+            <button type="button" class="chip-btn active" data-payment="Cash">💵 Cash</button>
+            <button type="button" class="chip-btn" data-payment="UPI">📱 UPI / GPay</button>
+            <button type="button" class="chip-btn" data-payment="Card">💳 Card</button>
+            <button type="button" class="chip-btn" data-payment="Other">🏷️ Other</button>
+          </div>
+          <input type="hidden" id="sale-payment-method" value="Cash">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="sale-notes">Notes (Optional)</label>
+          <textarea id="sale-notes" class="form-control" rows="2" placeholder="e.g. Custom birthday piping: Happy Birthday Aarav"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          💾 Save Sale Record
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 2. RECORD PURCHASE MODAL -->
+  <div id="modal-purchase" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Purchase / Expense</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <form id="form-purchase">
+        <div class="form-group">
+          <label class="form-label" for="purchase-bill-total">Bill Total Amount (₹) *</label>
+          <input 
+            type="number" 
+            id="purchase-bill-total" 
+            class="form-control" 
+            placeholder="e.g. 850" 
+            min="0" 
+            step="any" 
+            inputmode="decimal" 
+            style="font-size: 20px; font-weight: 700; color: var(--primary);"
+            required
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="purchase-date">Purchase Date *</label>
+            <input type="date" id="purchase-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="purchase-supplier">Store / Supplier</label>
+            <input type="text" id="purchase-supplier" class="form-control" placeholder="e.g. Metro / Local Grocery">
+          </div>
+        </div>
+
+        <!-- Optional Line Items -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin: 0;">Optional Item Details</label>
+            <button type="button" id="btn-add-purchase-item" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;">
+              + Add Item
+            </button>
+          </div>
+          <div id="purchase-items-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Line items dynamically appended -->
+          </div>
+        </div>
+
+        <!-- Checkbox to update stock -->
+        <div class="form-group" style="background-color: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm);">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600;">
+            <input type="checkbox" id="purchase-update-stock" style="width: 18px; height: 18px;">
+            <span>Automatically add line items above to inventory stock</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="purchase-notes">Notes</label>
+          <textarea id="purchase-notes" class="form-control" rows="2" placeholder="e.g. Bill receipt #402, paid via UPI"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          💾 Save Purchase Record
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 3. BAKE CAKE CONFIRMATION MODAL -->
+  <div id="modal-bake" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="bake-modal-title">🎂 Bake Cake & Deduct Stock</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Select Batch Size:</div>
+        <div class="stepper-wrap" style="justify-content: center; margin-bottom: 12px;">
+          <button type="button" class="stepper-btn" id="btn-bake-multiplier-minus">-</button>
+          <input 
+            type="number" 
+            id="bake-multiplier" 
+            class="form-control" 
+            value="1" 
+            min="0.5" 
+            step="0.5" 
+            inputmode="decimal" 
+            style="width: 100px; text-align: center; font-size: 20px; font-weight: 800;"
+          >
+          <button type="button" class="stepper-btn" id="btn-bake-multiplier-plus">+</button>
+        </div>
+        <div id="bake-yield-desc" style="text-align: center; font-weight: 600; color: var(--primary); font-size: 14px;">
+          Yield: 1 cake (1 kg)
+        </div>
+      </div>
+
+      <!-- Ingredient Requirements Preview Box -->
+      <div class="confirm-box">
+        <div class="confirm-box-title">Ingredients Required & Stock Preview:</div>
+        <div id="bake-ingredients-preview-list" style="margin-top: 8px;">
+          <!-- Dynamically previewed with sufficient / deficit badges -->
+        </div>
+      </div>
+
+      <div id="bake-warning-box" class="alert-card" style="display: none; padding: 10px; margin-bottom: 14px;">
+        <!-- Warnings printed here -->
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; text-align: center;">
+        ⚠️ Confirming will immediately deduct the required amounts from your inventory stock and record the bake history.
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-secondary" style="flex: 1;" data-close-modal>
+          Cancel
+        </button>
+        <button type="button" id="btn-confirm-bake-action" class="btn btn-primary" style="flex: 2;">
+          ✅ Confirm & Deduct Stock
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 4. ADD / EDIT INGREDIENT MODAL -->
+  <div id="modal-ingredient" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-ingredient-title">Add Ingredient</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <form id="form-ingredient">
+        <input type="hidden" id="ingredient-edit-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="ingredient-name">Ingredient Name *</label>
+          <input type="text" id="ingredient-name" class="form-control" placeholder="e.g. Unsalted Butter" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ingredient-category">Category</label>
+            <select id="ingredient-category" class="form-control">
+              <option value="Flour & Dry">Flour & Dry</option>
+              <option value="Sweeteners">Sweeteners</option>
+              <option value="Dairy & Eggs">Dairy & Eggs</option>
+              <option value="Cocoa & Flavors">Cocoa & Flavors</option>
+              <option value="Leavening">Leavening</option>
+              <option value="Fruits & Fillings">Fruits & Fillings</option>
+              <option value="Packaging">Packaging</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ingredient-unit">Unit *</label>
+            <select id="ingredient-unit" class="form-control">
+              <option value="g">Grams (g)</option>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="ml">Milliliters (ml)</option>
+              <option value="L">Liters (L)</option>
+              <option value="pcs">Pieces (pcs)</option>
+              <option value="tsp">Teaspoon (tsp)</option>
+              <option value="tbsp">Tablespoon (tbsp)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ingredient-quantity">Current Stock Quantity *</label>
+            <input 
+              type="number" 
+              id="ingredient-quantity" 
+              class="form-control" 
+              placeholder="1000" 
+              min="0" 
+              step="any" 
+              inputmode="decimal" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ingredient-min-stock">Min Stock Warning *</label>
+            <input 
+              type="number" 
+              id="ingredient-min-stock" 
+              class="form-control" 
+              placeholder="500" 
+              min="0" 
+              step="any" 
+              inputmode="decimal" 
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ingredient-cost">Approx Cost per Unit (₹)</label>
+          <input type="number" id="ingredient-cost" class="form-control" placeholder="e.g. 0.50" min="0" step="any" inputmode="decimal">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ingredient-notes">Notes</label>
+          <input type="text" id="ingredient-notes" class="form-control" placeholder="Brand, preferred shop, container location">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          💾 Save Ingredient
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 5. ADJUST STOCK MODAL -->
+  <div id="modal-adjust-stock" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Adjust Stock</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <form id="form-adjust-stock">
+        <input type="hidden" id="adjust-ingredient-id" value="">
+
+        <div style="background-color: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 14px;">
+          <div id="adjust-ingredient-name" style="font-weight: 700; font-size: 16px;">Flour</div>
+          <div id="adjust-current-stock" style="font-size: 13px; color: var(--text-muted);">Current Stock: 2000 g</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adjustment Type</label>
+          <div class="chip-group" id="adjust-type-chips">
+            <button type="button" class="chip-btn active" data-type="RESTOCK_PURCHASE">➕ Restock (Bought)</button>
+            <button type="button" class="chip-btn" data-type="MANUAL_ADJUSTMENT">⚖️ Correction</button>
+            <button type="button" class="chip-btn" data-type="WASTE">🗑️ Waste / Spoilage</button>
+          </div>
+          <input type="hidden" id="adjust-type" value="RESTOCK_PURCHASE">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adjust-delta">Change Amount (+ or -) *</label>
+          <input 
+            type="number" 
+            id="adjust-delta" 
+            class="form-control" 
+            placeholder="e.g. 500 for restock, or -200 for waste" 
+            step="any" 
+            inputmode="decimal" 
+            required
+          >
+          <div id="adjust-preview-result" style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 600;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adjust-reason">Reason / Reference *</label>
+          <input type="text" id="adjust-reason" class="form-control" placeholder="e.g. Bought from Metro supermarket" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          Update Stock
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 6. INVENTORY LOGS / AUDIT MODAL -->
+  <div id="modal-inventory-logs" class="modal-overlay">
+    <div class="modal-content" style="max-height: 85vh;">
+      <div class="modal-header">
+        <h3 class="modal-title">📜 Stock Change History</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+        Complete dated audit trail of all baking usage, restocks, and adjustments.
+      </p>
+      <div id="inventory-logs-list" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Logs rendered here -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 7. ADD / EDIT RECIPE MODAL -->
+  <div id="modal-recipe" class="modal-overlay">
+    <div class="modal-content" style="max-height: 90vh;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-recipe-title">Create Cake Recipe</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <form id="form-recipe">
+        <input type="hidden" id="recipe-edit-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="recipe-name">Recipe Name *</label>
+          <input type="text" id="recipe-name" class="form-control" placeholder="e.g. Fresh Mango Cake (1 kg)" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="recipe-category">Category</label>
+            <select id="recipe-category" class="form-control">
+              <option value="Cakes">Cakes</option>
+              <option value="Tea Cakes">Tea Cakes</option>
+              <option value="Cupcakes">Cupcakes</option>
+              <option value="Pastries">Pastries</option>
+              <option value="Cookies">Cookies</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="recipe-yield-unit">Yield Description *</label>
+            <input type="text" id="recipe-yield-unit" class="form-control" value="cake (1 kg)" placeholder="e.g. cake (1 kg)" required>
+          </div>
+        </div>
+
+        <!-- Recipe Ingredients List -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label class="form-label" style="margin: 0;">Recipe Ingredients *</label>
+            <button type="button" id="btn-add-recipe-ingredient-row" class="btn btn-secondary btn-sm" style="padding: 3px 8px; font-size: 12px;">
+              ➕ Add Ingredient
+            </button>
+          </div>
+          <div id="recipe-ingredients-rows" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Rows added here -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="recipe-instructions">Baking Instructions / Notes</label>
+          <textarea id="recipe-instructions" class="form-control" rows="3" placeholder="Bake temperature, oven time, frosting notes..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          💾 Save Recipe
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 8. ADD SHOPPING ITEM MODAL -->
+  <div id="modal-shopping-item" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Shopping Item</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <form id="form-shopping-item">
+        <div class="form-group">
+          <label class="form-label" for="shopping-item-name">Item Name *</label>
+          <input type="text" id="shopping-item-name" class="form-control" placeholder="e.g. Cocoa powder, 10-inch cake boards" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="shopping-item-qty">Quantity *</label>
+            <input type="number" id="shopping-item-qty" class="form-control" value="1" min="0.1" step="any" inputmode="decimal" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shopping-item-unit">Unit *</label>
+            <input type="text" id="shopping-item-unit" class="form-control" value="pcs" placeholder="g, kg, pcs, L" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="shopping-item-notes">Notes (Optional)</label>
+          <input type="text" id="shopping-item-notes" class="form-control" placeholder="e.g. Buy from metro, get golden boards">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          Add to Shopping List
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 9. MARK BOUGHT CONFIRMATION MODAL -->
+  <div id="modal-mark-bought" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Item Bought!</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <div style="background-color: var(--success-bg); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 14px;">
+        <div id="mark-bought-item-name" style="font-weight: 700; font-size: 16px; color: var(--success);">Butter</div>
+        <div id="mark-bought-item-qty" style="font-size: 13px; color: var(--text-muted);">Quantity: 1000 g</div>
+      </div>
+
+      <form id="form-mark-bought">
+        <input type="hidden" id="mark-bought-item-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="mark-bought-actual-qty">Actual Quantity Bought</label>
+          <input type="number" id="mark-bought-actual-qty" class="form-control" step="any" inputmode="decimal">
+        </div>
+
+        <!-- Checkbox: Update Stock -->
+        <div class="form-group" style="background-color: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm);">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600;">
+            <input type="checkbox" id="mark-bought-update-stock" checked style="width: 18px; height: 18px;">
+            <span>Add this amount directly to Inventory Stock</span>
+          </label>
+        </div>
+
+        <!-- Checkbox: Record Purchase Expense -->
+        <div class="form-group" style="background-color: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm);">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600;">
+            <input type="checkbox" id="mark-bought-record-expense" style="width: 18px; height: 18px;">
+            <span>Also log this as a Purchase Expense</span>
+          </label>
+          <div id="mark-bought-expense-wrap" style="display: none; margin-top: 8px;">
+            <input type="number" id="mark-bought-cost" class="form-control" placeholder="Enter total cost (₹)" min="0" step="any" inputmode="decimal">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
+          ✅ Complete & Update Stock
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 10. USER SETTINGS & SECURITY MODAL -->
+  <div id="modal-user-settings" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">👤 Owner Account</h3>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <div style="background-color: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); margin-bottom: 16px;">
+        <div style="font-weight: 700; font-size: 15px;" id="profile-full-name">Baker Mom</div>
+        <div style="font-size: 13px; color: var(--text-muted);" id="profile-username">Username: mom</div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Private single-owner access</div>
+      </div>
+
+      <h4 style="font-size: 14px; margin-bottom: 10px;">Change Password</h4>
+      <form id="form-change-password">
+        <div class="form-group">
+          <label class="form-label" for="pwd-current">Current Password</label>
+          <input type="password" id="pwd-current" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pwd-new">New Password</label>
+          <input type="password" id="pwd-new" class="form-control" minlength="4" required>
+        </div>
+        <button type="submit" class="btn btn-secondary btn-full">
+          Update Password
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

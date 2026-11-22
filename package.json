@@ -1,0 +1,20 @@
+{
+  "name": "moms-cake-business-manager",
+  "version": "1.0.0",
+  "description": "Private, phone-friendly web app to manage homemade cake sales, purchases, inventory, recipes, and shopping list.",
+  "main": "run.py",
+  "scripts": {
+    "start": "python run.py",
+    "dev": "python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000",
+    "test": "python test_suite.py",
+    "seed": "python -m backend.seed"
+  },
+  "keywords": [
+    "cake-business",
+    "inventory-management",
+    "bakery",
+    "sales-tracker"
+  ],
+  "author": "",
+  "license": "ISC"
+}
